@@ -1,22 +1,4 @@
 None
-None
-None
-# Encoder-Decoder with Atrous Separable Convolution for Semantic Image
-Segmentation
-
-## Introduction
-
-<!-- [ALGORITHM] -->
-
-```{.python .input .latex}
-@inproceedings{deeplabv3plus2018,
-  title={Encoder-Decoder with Atrous Separable Convolution for Semantic Image Segmentation},
-  author={Liang-Chieh Chen and Yukun Zhu and George Papandreou and Florian Schroff and Hartwig Adam},
-  booktitle={ECCV},
-  year={2018}
-}
-```
-
 # Encoder-Decoder with Atrous Separable Convolution for Semantic Image
 Segmentation
 
@@ -361,14 +343,6 @@ mmlab/mmsegmentation/blob/master/configs/deeplabv3plus/deeplabv3plus_r101-d8_480
 &#124;
 [log](https://download.openmmlab.com/mmsegmentation/v0.5/deeplabv3plus/deeplabv3plus_r101-d8_480x480_80k_pascal_context_59/deeplabv3plus_r101-d8_480x480_80k_pascal_context_59-20210416_111127.log.json)
 |
-
-
-## Reproduced results
-### Cityscapes
-| Source     | #GPUs | Method | Backbone | Crop Size | Lr schd |  mIoU |
-| ------------ | :---: | :----: | -------: | --------- | ------- | ----: |
-| Official   | 4    | DeepLabV3+ | R-50-d8 | 512x1024 | 40000  | 79.61 |
-| Reproduced  | 2    | DeepLabV3+ | R-50-d8 | 512x1024 | 80000  | 79.29 |
 
 ```{.python .input}
 
