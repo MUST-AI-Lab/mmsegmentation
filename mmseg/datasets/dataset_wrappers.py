@@ -160,6 +160,24 @@ class ConcatDataset(_ConcatDataset):
         return sum(ret_res, [])
 
 
+
+@DATASETS.register_module()
+class SemiDataset(ConcatDataset):
+    """Semisupervised dataset, used for CPS semi-sup learning."""
+
+    def __init__(self, sup: dict, unsup: dict, **kwargs):
+        from .builder import build_dataset
+        super().__init__([build_dataset(sup), build_dataset(unsup)], **kwargs)
+        # This constructor is used in builder.py( build_dataset)
+        # This constructor accept dict instead of object, which is different from other wrapper constructors.
+    @property
+    def sup(self):
+        return self.datasets[0]
+
+    @property
+    def unsup(self):
+        return self.datasets[1]
+
 @DATASETS.register_module()
 class RepeatDataset(object):
     """A wrapper of repeated dataset.

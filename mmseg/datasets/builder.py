@@ -64,12 +64,14 @@ def _concat_dataset(cfg, default_args=None):
 
 def build_dataset(cfg, default_args=None):
     """Build datasets."""
-    from .dataset_wrappers import ConcatDataset, RepeatDataset
+    from .dataset_wrappers import ConcatDataset, RepeatDataset, SemiDataset
     if isinstance(cfg, (list, tuple)):
         dataset = ConcatDataset([build_dataset(c, default_args) for c in cfg])
     elif cfg['type'] == 'RepeatDataset':
         dataset = RepeatDataset(
             build_dataset(cfg['dataset'], default_args), cfg['times'])
+    elif cfg['type'] == 'SemiDataset':
+        dataset = SemiDataset(cfg['sup'], cfg['unsup'], default_args)
     elif isinstance(cfg.get('img_dir'), (list, tuple)) or isinstance(
             cfg.get('split', None), (list, tuple)):
         dataset = _concat_dataset(cfg, default_args)

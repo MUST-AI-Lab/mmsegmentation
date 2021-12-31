@@ -1,5 +1,6 @@
 # model settings
 norm_cfg = dict(type='SyncBN', requires_grad=True)
+#SyncB
 model = dict(
     type='EncoderDecoder',
     pretrained='open-mmlab://resnet50_v1c',

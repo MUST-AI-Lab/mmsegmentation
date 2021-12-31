@@ -6,7 +6,7 @@ from .cityscapes import CityscapesDataset
 from .coco_stuff import COCOStuffDataset
 from .custom import CustomDataset
 from .dark_zurich import DarkZurichDataset
-from .dataset_wrappers import ConcatDataset, RepeatDataset
+from .dataset_wrappers import ConcatDataset, RepeatDataset, SemiDataset
 from .drive import DRIVEDataset
 from .hrf import HRFDataset
 from .night_driving import NightDrivingDataset
@@ -16,11 +16,12 @@ from .voc import PascalVOCDataset
 from .camvid_video import CamVidVideoDataset
 from .custom_video import CustomVideoDataset
 
+
 __all__ = [
     'CustomDataset', 'build_dataloader', 'ConcatDataset', 'RepeatDataset',
     'DATASETS', 'build_dataset', 'PIPELINES', 'CityscapesDataset',
     'PascalVOCDataset', 'ADE20KDataset', 'PascalContextDataset',
     'PascalContextDataset59', 'ChaseDB1Dataset', 'DRIVEDataset', 'HRFDataset',
     'STAREDataset', 'DarkZurichDataset', 'NightDrivingDataset',
-    'COCOStuffDataset','CamVidVideoDataset','CustomVideoDataset'
+    'COCOStuffDataset','CamVidVideoDataset','CustomVideoDataset','SemiDataset'
 ]
