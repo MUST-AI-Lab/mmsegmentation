@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 from .compose import Compose
 from .formating import (Collect, ImageToTensor, ToDataContainer, ToTensor,
-                        Transpose, to_tensor)
+                        Transpose, to_tensor, Add_Pseudo_gt)
 from .loading import LoadAnnotations, LoadImageFromFile
 from .test_time_aug import MultiScaleFlipAug
 from .transforms import (CLAHE, AdjustGamma, Normalize, Pad,
@@ -13,5 +13,5 @@ __all__ = [
     'Transpose', 'Collect', 'LoadAnnotations', 'LoadImageFromFile',
     'MultiScaleFlipAug', 'Resize', 'RandomFlip', 'Pad', 'RandomCrop',
     'Normalize', 'SegRescale', 'PhotoMetricDistortion', 'RandomRotate',
-    'AdjustGamma', 'CLAHE', 'Rerange', 'RGB2Gray'
+    'AdjustGamma', 'CLAHE', 'Rerange', 'RGB2Gray', 'Add_Pseudo_gt'
 ]

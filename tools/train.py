@@ -16,7 +16,7 @@ from mmseg import __version__
 from mmseg.apis import set_random_seed, train_segmentor
 from mmseg.datasets import build_dataset
 from mmseg.models import build_segmentor
-from mmseg.utils import collect_env, get_root_logger
+from mmseg.utils import collect_env, get_root_logger, patch_config_semi
 
 
 def parse_args():
@@ -65,8 +65,8 @@ def parse_args():
 
 def main():
     args = parse_args()
-
     cfg = Config.fromfile(args.config)
+
     if args.options is not None:
         cfg.merge_from_dict(args.options)
     # set cudnn_benchmark
@@ -91,6 +91,7 @@ def main():
         cfg.gpu_ids = range(1) if args.gpus is None else range(args.gpus)
 
     # init distributed env first, since logger depends on the dist info.
+    cfg = patch_config_semi(cfg)
     if args.launcher == 'none':
         distributed = False
     else:
@@ -109,9 +110,11 @@ def main():
     log_file = osp.join(cfg.work_dir, f'{timestamp}.log')
     logger = get_root_logger(log_file=log_file, log_level=cfg.log_level)
 
+
     # init the meta dict to record some important information such as
     # environment info and seed, which will be logged
     meta = dict()
+    
     # log env info
     env_info_dict = collect_env()
     env_info = '\n'.join([f'{k}: {v}' for k, v in env_info_dict.items()])
@@ -132,7 +135,7 @@ def main():
     cfg.seed = args.seed
     meta['seed'] = args.seed
     meta['exp_name'] = osp.basename(args.config)
-
+    
     model = build_segmentor(
         cfg.model,
         train_cfg=cfg.get('train_cfg'),

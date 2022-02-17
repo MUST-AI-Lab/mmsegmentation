@@ -15,6 +15,7 @@ from .stare import STAREDataset
 from .voc import PascalVOCDataset
 from .camvid_video import CamVidVideoDataset
 from .custom_video import CustomVideoDataset
+from .datas6 import Ds6Dataset
 
 
 __all__ = [
@@ -23,5 +24,5 @@ __all__ = [
     'PascalVOCDataset', 'ADE20KDataset', 'PascalContextDataset',
     'PascalContextDataset59', 'ChaseDB1Dataset', 'DRIVEDataset', 'HRFDataset',
     'STAREDataset', 'DarkZurichDataset', 'NightDrivingDataset',
-    'COCOStuffDataset','CamVidVideoDataset','CustomVideoDataset','SemiDataset'
+    'COCOStuffDataset','CamVidVideoDataset','CustomVideoDataset','SemiDataset', 'Ds6Dataset'
 ]

@@ -10,6 +10,7 @@ from mmcv.parallel import collate
 from mmcv.runner import get_dist_info
 from mmcv.utils import Registry, build_from_cfg, digit_version
 from torch.utils.data import DataLoader, DistributedSampler
+from .samplers import DistributedSemiSampler
 
 if platform.system() != 'Windows':
     # https://github.com/pytorch/pytorch/issues/973
@@ -22,6 +23,9 @@ if platform.system() != 'Windows':
 
 DATASETS = Registry('dataset')
 PIPELINES = Registry('pipeline')
+SAMPLERS = Registry('sampler')
+
+SAMPLERS.register_module(module=DistributedSemiSampler)
 
 
 def _concat_dataset(cfg, default_args=None):
@@ -71,7 +75,7 @@ def build_dataset(cfg, default_args=None):
         dataset = RepeatDataset(
             build_dataset(cfg['dataset'], default_args), cfg['times'])
     elif cfg['type'] == 'SemiDataset':
-        dataset = SemiDataset(cfg['sup'], cfg['unsup'], default_args)
+        dataset = SemiDataset(cfg['sup'], cfg['unsup'], default_args = default_args)
     elif isinstance(cfg.get('img_dir'), (list, tuple)) or isinstance(
             cfg.get('split', None), (list, tuple)):
         dataset = _concat_dataset(cfg, default_args)
@@ -123,6 +127,14 @@ def build_dataloader(dataset,
         DataLoader: A PyTorch dataloader.
     """
     rank, world_size = get_dist_info()
+    cfg = kwargs.get('cfg', None)
+    sampler_cfg = None
+    if cfg is not None:
+        kwargs.pop('cfg')
+        if cfg.get('sampler', None) is not None:
+            sampler_cfg = cfg.get('sampler', None).get('train', None)
+            shuffle = False
+
     if dist:
         sampler = DistributedSampler(
             dataset, world_size, rank, shuffle=shuffle)
@@ -133,6 +145,9 @@ def build_dataloader(dataset,
         sampler = None
         batch_size = num_gpus * samples_per_gpu
         num_workers = num_gpus * workers_per_gpu
+
+    if sampler_cfg is not None:
+        sampler = build_from_cfg(sampler_cfg, SAMPLERS, dict(dataset=dataset))
 
     init_fn = partial(
         worker_init_fn, num_workers=num_workers, rank=rank,

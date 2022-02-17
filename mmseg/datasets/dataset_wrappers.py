@@ -167,9 +167,10 @@ class SemiDataset(ConcatDataset):
 
     def __init__(self, sup: dict, unsup: dict, **kwargs):
         from .builder import build_dataset
-        super().__init__([build_dataset(sup), build_dataset(unsup)], **kwargs)
+        super().__init__([build_dataset(sup, **kwargs), build_dataset(unsup, **kwargs)])
         # This constructor is used in builder.py( build_dataset)
         # This constructor accept dict instead of object, which is different from other wrapper constructors.
+
     @property
     def sup(self):
         return self.datasets[0]

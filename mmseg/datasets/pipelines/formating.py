@@ -35,6 +35,17 @@ def to_tensor(data):
 
 
 @PIPELINES.register_module()
+class ExtraAttrs(object):
+    def __init__(self, **attrs):
+        self.attrs = attrs
+
+    def __call__(self, results):
+        for k, v in self.attrs.items():
+            assert k not in results
+            results[k] = v
+        return results
+
+@PIPELINES.register_module()
 class ToTensor(object):
     """Convert some results to :obj:`torch.Tensor` by given keys.
 
@@ -287,3 +298,28 @@ class Collect(object):
     def __repr__(self):
         return self.__class__.__name__ + \
                f'(keys={self.keys}, meta_keys={self.meta_keys})'
+
+    
+@PIPELINES.register_module()
+class Add_Pseudo_gt(object):
+    """
+    Used in semi-supervised learning.
+    Add fake "gt_semantic_seg" attribute for unlabeled data. So that, the format keeps compatible with other modules.
+    
+    Args:
+        "fill_value": All the pixels of the fake ground truth will be assigned this value.
+        
+    """
+    
+    def __init__(self, fill_value=255):
+        self.fill_value = fill_value
+
+    def __call__(self, results):
+        results["gt_semantic_seg"] = self.fill_value * np.ones(
+            results["img"].shape[:2], dtype=np.uint8
+        )
+        if "seg_fields" not in results:
+            results["seg_fields"] = []
+        if "gt_semantic_seg" not in results["seg_fields"]:
+            results["seg_fields"].append("gt_semantic_seg")
+        return results

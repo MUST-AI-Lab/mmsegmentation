@@ -5,9 +5,9 @@ import warnings
 import numpy as np
 import torch
 from mmcv.parallel import MMDataParallel, MMDistributedDataParallel
-from mmcv.runner import build_optimizer, build_runner
+from mmcv.runner import build_runner
 
-from mmseg.core import DistEvalHook, EvalHook
+from mmseg.core import DistEvalHook, EvalHook, build_optimizers
 from mmseg.datasets import build_dataloader, build_dataset
 from mmseg.utils import get_root_logger
 
@@ -52,7 +52,8 @@ def train_segmentor(model,
             len(cfg.gpu_ids),
             dist=distributed,
             seed=cfg.seed,
-            drop_last=True) for ds in dataset
+            drop_last=True,
+            cfg=cfg.data) for ds in dataset
     ]
 
     # put model on gpus
@@ -70,7 +71,7 @@ def train_segmentor(model,
             model.cuda(cfg.gpu_ids[0]), device_ids=cfg.gpu_ids)
 
     # build runner
-    optimizer = build_optimizer(model, cfg.optimizer)
+    optimizer = build_optimizers(model, cfg.optimizer)
 
     if cfg.get('runner') is None:
         cfg.runner = {'type': 'IterBasedRunner', 'max_iters': cfg.total_iters}
@@ -87,7 +88,7 @@ def train_segmentor(model,
             work_dir=cfg.work_dir,
             logger=logger,
             meta=meta))
-
+    _temp = cfg.optimizer_config
     # register hooks
     runner.register_training_hooks(cfg.lr_config, cfg.optimizer_config,
                                    cfg.checkpoint_config, cfg.log_config,

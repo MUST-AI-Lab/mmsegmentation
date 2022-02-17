@@ -14,4 +14,3 @@
 | ------------ | :---: | :----: | -------: | --------- | ------- |----:|--------|:---------------|
 | Reproduced   | 2    | DeepLabV3+ | R-50-d8 | 640x640 | 80000  |76.18|[Config](configs/deeplabv3plus/deeplabv3plus_r50-d8_640x640_80k_camvid.py)|[Notebook](ipynb/camvid_deeplab+.ipynb)|
 | Reproduced  | 2    | FCN | Unet | 640x640 | 80000  |72.33|[Config](/configs/unet/fcn_unet_r5-d16_640x640_80k_camvid.py)|[Notebook](ipynb/camvid_unet.ipynb)|
-#
