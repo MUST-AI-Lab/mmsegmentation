@@ -71,6 +71,7 @@ def parse_args():
         default=0.5,
         help='Opacity of painted segmentation map. In (0, 1] range.')
     parser.add_argument('--local_rank', type=int, default=0)
+    parser.add_argument('--return_prob', type=bool, default=False)
     args = parser.parse_args()
     if 'LOCAL_RANK' not in os.environ:
         os.environ['LOCAL_RANK'] = str(args.local_rank)
@@ -176,7 +177,8 @@ def main():
         mmcv.mkdir_or_exist(tmpdir)
     else:
         tmpdir = None
-
+    if 'auc' in args.eval:
+        return_prob=True
     if not distributed:
         model = MMDataParallel(model, device_ids=[0])
         results = single_gpu_test(
@@ -186,9 +188,10 @@ def main():
             args.show_dir,
             False,
             args.opacity,
-            pre_eval=args.eval is not None and not eval_on_format_results,
+            pre_eval=args.eval is not None and not eval_on_format_results and not return_prob,
             format_only=args.format_only or eval_on_format_results,
-            format_args=eval_kwargs)
+            format_args=eval_kwargs,
+            return_prob=return_prob)
     else:
         model = MMDistributedDataParallel(
             model.cuda(),

@@ -381,7 +381,7 @@ class CustomDataset(Dataset):
         """
         if isinstance(metric, str):
             metric = [metric]
-        allowed_metrics = ['mIoU', 'mDice', 'mFscore']
+        allowed_metrics = ['mIoU', 'mDice', 'mFscore', 'auc']
         if not set(metric).issubset(set(allowed_metrics)):
             raise KeyError('metric {} is not supported'.format(metric))
 
@@ -411,17 +411,29 @@ class CustomDataset(Dataset):
             class_names = self.CLASSES
 
         # summary table
-        ret_metrics_summary = OrderedDict({
-            ret_metric: np.round(np.nanmean(ret_metric_value) * 100, 2)
-            for ret_metric, ret_metric_value in ret_metrics.items()
-        })
+        if 'auc' in ret_metrics.keys():
+            ret_metrics_summary = OrderedDict({
+                ret_metric: np.round(np.max(ret_metric_value), 5)
+                for ret_metric, ret_metric_value in ret_metrics.items()
+            })
+        else:
+            ret_metrics_summary = OrderedDict({
+                ret_metric: np.round(np.nanmean(ret_metric_value) * 100, 2)
+                for ret_metric, ret_metric_value in ret_metrics.items()
+            })
 
         # each class table
         ret_metrics.pop('aAcc', None)
-        ret_metrics_class = OrderedDict({
-            ret_metric: np.round(ret_metric_value * 100, 2)
-            for ret_metric, ret_metric_value in ret_metrics.items()
-        })
+        if 'auc' in ret_metrics.keys():
+            ret_metrics_class = OrderedDict({
+                ret_metric: np.round(ret_metric_value, 5)
+                for ret_metric, ret_metric_value in ret_metrics.items()
+            })
+        else:
+            ret_metrics_class = OrderedDict({
+                ret_metric: np.round(ret_metric_value * 100, 2)
+                for ret_metric, ret_metric_value in ret_metrics.items()
+            })
         ret_metrics_class.update({'Class': class_names})
         ret_metrics_class.move_to_end('Class', last=False)
 

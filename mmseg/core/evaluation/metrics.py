@@ -4,7 +4,7 @@ from collections import OrderedDict
 import mmcv
 import numpy as np
 import torch
-
+from sklearn.metrics import roc_auc_score
 
 def f_score(precision, recall, beta=1):
     """calcuate the f-score value.
@@ -280,7 +280,15 @@ def eval_metrics(results,
         ndarray: Per category accuracy, shape (num_classes, ).
         ndarray: Per category evaluation metrics, shape (num_classes, ).
     """
-
+    if 'auc' in metrics:
+        results_vec = np.concatenate([i for i in results])
+        results_vec = results_vec.reshape(results_vec.shape[0]*results_vec.shape[1], 1)
+        gt_vec = np.concatenate([i for i in gt_seg_maps])
+        gt_vec = gt_vec.reshape(gt_vec.shape[0]*gt_vec.shape[1], 1)
+        AUC_ROC = roc_auc_score(gt_vec, results_vec)
+        ret_metrics = {}
+        ret_metrics['auc'] = np.array([0, AUC_ROC])
+        return ret_metrics
     total_area_intersect, total_area_union, total_area_pred_label, \
         total_area_label = total_intersect_and_union(
             results, gt_seg_maps, num_classes, ignore_index, label_map,
