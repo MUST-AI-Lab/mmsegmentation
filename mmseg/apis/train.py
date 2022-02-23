@@ -10,7 +10,7 @@ from mmcv.runner import build_runner
 from mmseg.core import DistEvalHook, EvalHook, build_optimizers
 from mmseg.datasets import build_dataloader, build_dataset
 from mmseg.utils import get_root_logger
-
+from knockknock import email_sender
 
 def set_random_seed(seed, deterministic=False):
     """Set random seed.
@@ -30,7 +30,7 @@ def set_random_seed(seed, deterministic=False):
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
 
-
+#@email_sender(recipient_emails=["zhuzenglingll@gmail.com"])
 def train_segmentor(model,
                     dataset,
                     cfg,
