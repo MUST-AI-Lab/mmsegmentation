@@ -5,12 +5,12 @@ _base_ = [
 ]
 
 model = dict(
-    decode_head=dict(num_classes=20), auxiliary_head=dict(num_classes=20))
+    decode_head=dict(num_classes=20))
 
 
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
-crop_size = (512, 512)
+crop_size = (300, 300)
 sup_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations'),
@@ -44,6 +44,7 @@ unsup_pipeline = [
                                                     'flip_direction', 'img_norm_cfg', 'tag']),
 ]
 
+
 """
 data = dict(
     samples_per_gpu=4,
@@ -57,6 +58,7 @@ data = dict(
         pipeline=sup_pipeline),
 )
 """
+
 data = dict(
     samples_per_gpu=4,
     train=dict(
@@ -64,7 +66,7 @@ data = dict(
         type='SemiDataset',
         sup=dict(
             type='PascalVOCDataset',
-            data_root='../data/VOCdevkit/VOC2012',
+            data_root='data/VOCdevkit/VOC2012',
             img_dir='JPEGImages',
             ann_dir='SegmentationClass',
             split='ImageSets/Segmentation/semi_partition/pseudoseg_labeled_1-8.txt',
@@ -72,7 +74,7 @@ data = dict(
         ),
         unsup=dict(
             type='PascalVOCDataset',
-            data_root='../data/VOCdevkit/VOC2012',
+            data_root='data/VOCdevkit/VOC2012',
             img_dir='JPEGImages',
             ann_dir='SegmentationClass',
             split='ImageSets/Segmentation/semi_partition/pseudoseg_unlabeled_1-8.txt',
@@ -93,10 +95,12 @@ semi_wrapper = dict(
     type="CrossPesudoSupervision",
     train_cfg=dict(unsup_weight=1.5),
 )
-
+"""
 # Two optimizer for each branch
 optimizer = dict(
     _delete_=True,
-    branch1=dict(type='SGD', lr=0.000625, momentum=0.9, weight_decay=0.0005),
-    branch2=dict(type='SGD', lr=0.000625, momentum=0.9, weight_decay=0.0005),
+    branch1=dict(type='SGD', lr=0.00031, momentum=0.9, weight_decay=0.0005),
+    branch2=dict(type='SGD', lr=0.00031, momentum=0.9, weight_decay=0.0005),
 )
+"""
+optimizer = dict(type='SGD', lr=0.00031, momentum=0.9, weight_decay=0.0005)

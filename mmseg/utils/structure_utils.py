@@ -46,5 +46,5 @@ def patch_config_semi(cfg):
         cfg.model = cfg.semi_wrapper
         cfg.pop("semi_wrapper")
         #This will disable the optimizer hook, since we use customized update logic.
-        cfg.optimizer_config = None
+        #cfg.optimizer_config = None
     return cfg

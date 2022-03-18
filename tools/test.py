@@ -12,7 +12,7 @@ from mmcv.parallel import MMDataParallel, MMDistributedDataParallel
 from mmcv.runner import (get_dist_info, init_dist, load_checkpoint,
                          wrap_fp16_model)
 from mmcv.utils import DictAction
-
+from mmseg.utils import patch_config_semi
 from mmseg.apis import multi_gpu_test, single_gpu_test
 from mmseg.datasets import build_dataloader, build_dataset
 from mmseg.models import build_segmentor
@@ -49,6 +49,12 @@ def parse_args():
         '--gpu-collect',
         action='store_true',
         help='whether to use gpu to collect results.')
+    parser.add_argument(
+        '--gpu-id',
+        type=int,
+        default=0,
+        help='id of gpu to use '
+        '(only applicable to non-distributed testing)')
     parser.add_argument(
         '--tmpdir',
         help='tmp directory used for collecting results from multiple '
@@ -100,11 +106,10 @@ def main():
     if cfg.get('cudnn_benchmark', False):
         torch.backends.cudnn.benchmark = True
     if args.aug_test:
+        print(cfg.data.test)
         # hard code index
-        cfg.data.test.pipeline[1].img_ratios = [
-            0.5, 0.75, 1.0, 1.25, 1.5, 1.75
-        ]
-        cfg.data.test.pipeline[1].flip = True
+        cfg.data.test.pipeline[1].img_ratios = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75]
+        cfg.data.test.pipeline[1].flip = False
     cfg.model.pretrained = None
     cfg.data.test.test_mode = True
 
@@ -134,6 +139,7 @@ def main():
 
     # build the model and load checkpoint
     cfg.model.train_cfg = None
+    cfg = patch_config_semi(cfg)
     model = build_segmentor(cfg.model, test_cfg=cfg.get('test_cfg'))
     fp16_cfg = cfg.get('fp16', None)
     if fp16_cfg is not None:
@@ -178,9 +184,12 @@ def main():
     else:
         tmpdir = None
     if 'auc' in args.eval:
-        return_prob=True
+        return_prob = True
+    else:
+        return_prob = False
     if not distributed:
-        model = MMDataParallel(model, device_ids=[0])
+        model = MMDataParallel(model, device_ids=[args.gpu_id])
+        print(args.gpu_id)
         results = single_gpu_test(
             model,
             data_loader,

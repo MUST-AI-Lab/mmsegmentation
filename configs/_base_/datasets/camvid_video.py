@@ -4,7 +4,7 @@ data_root = 'data/camvid/'
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 img_scale = (960, 720)
-crop_size = (640, 640)
+crop_size = (512, 512)
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations'),
@@ -57,5 +57,7 @@ data = dict(
         data_root=data_root,
         img_dir='images',
         ann_dir='labels',
-        split='annotations/test.txt',
+        split='annotations/val.txt',
         pipeline=test_pipeline))
+
+        #split='annotations/test.txt',
