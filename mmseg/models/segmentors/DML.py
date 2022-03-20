@@ -1,7 +1,7 @@
 from .. import build_segmentor, SEGMENTORS, build_loss
 from .multi_stream_segmentor import MultiStreamSegmentor
 from mmseg.utils import dict_split, weighted_loss
-import torch
+import torch.nn.functional as F
 import copy
 
 @SEGMENTORS.register_module()
@@ -50,18 +50,23 @@ class DML(MultiStreamSegmentor):
         # 1. calculate CPS loss for all data
         log_vars_cps = self._forward_DML_train(pred_1, pred_2)
         log_vars.update(log_vars_cps)
+        print(log_vars)
 
         # 2. calculate supervised loss (cross-entropy) for labeled data
         log_vars_sup = dict()
         log_vars_sup['sup_loss1'] = self._loss(self.branch1, pred_1, gt_semantic_seg.squeeze(1))#gt_seg.squeeze(1)
         log_vars_sup['sup_loss2'] = self._loss(self.branch2, pred_2, gt_semantic_seg.squeeze(1))
         log_vars.update(log_vars_sup)
+        print(log_vars)
         return log_vars
 
     def _forward_DML_train(self, pred_1, pred_2):
         loss = {}
-        label1 = pred_1.float()
-        label2 = pred_2.float()
+        pred_1=F.log_softmax(pred_1, dim=1)
+        pred_2=F.log_softmax(pred_2, dim=1)
+        label1 = pred_1.detach()
+        label2 = pred_2.detach()
+        temp=pred_1.log()
         loss['unsup_loss1'] = weighted_loss(self._loss(self.branch1, pred_1, label2, True), self.unsup_weight)
         loss['unsup_loss2'] = weighted_loss(self._loss(self.branch2, pred_2, label1, True), self.unsup_weight)
         return loss

@@ -13,7 +13,7 @@ evaluation = dict(metric=['mDice','mIoU', 'mFscore'])
 semi_wrapper = dict(
     type="DML",
     train_cfg=dict(unsup_weight=1),
-    test_cfg=dict(inference_on='branch1'),
+    test_cfg=dict(inference_on='branch2'),
 )
 
 optimizer = dict(type='SGD', lr=0.0025, momentum=0.9, weight_decay=0.0005)
