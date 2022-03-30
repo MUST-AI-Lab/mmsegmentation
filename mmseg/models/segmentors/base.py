@@ -169,12 +169,16 @@ class BaseSegmentor(BaseModule, metaclass=ABCMeta):
                 all the variables to be sent to the logger.
         """
         log_vars = OrderedDict()
+        is_unsup_weight=False
         for loss_name, loss_value in losses.items():
             if isinstance(loss_value, torch.Tensor):
                 log_vars[loss_name] = loss_value.mean()
             elif isinstance(loss_value, list):
                 log_vars[loss_name] = sum(_loss.mean() for _loss in loss_value)
             else:
+                if "unsup_weight" in loss_name:
+                    is_unsup_weight=True
+                    continue
                 raise TypeError(
                     f'{loss_name} is not a tensor or list of tensors')
 
@@ -188,7 +192,8 @@ class BaseSegmentor(BaseModule, metaclass=ABCMeta):
                 loss_value = loss_value.data.clone()
                 dist.all_reduce(loss_value.div_(dist.get_world_size()))
             log_vars[loss_name] = loss_value.item()
-
+        if is_unsup_weight==True:
+            log_vars['unsup_weight'] = losses['unsup_weight']
         return loss, log_vars
 
     def show_result(self,

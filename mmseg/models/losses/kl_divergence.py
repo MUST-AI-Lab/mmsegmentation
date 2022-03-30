@@ -16,9 +16,7 @@ def kl_divergence(pred,
     """The wrapper function for :func:`F.cross_entropy`"""
     # class_weight is a manual rescaling weight given to each class.
     # If given, has to be a Tensor of size C element-wise losses
-    loss = F.kl_div(pred,label,reduction='batchmean', log_target=True)
-    print("kl:")
-    print(loss)
+    loss = F.kl_div(pred,label,reduction=reduction, log_target=True)
     # apply weights and do the reduction
     if weight is not None:
         weight = weight.float()

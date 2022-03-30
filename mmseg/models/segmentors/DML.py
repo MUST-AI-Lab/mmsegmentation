@@ -14,6 +14,7 @@ class DML(MultiStreamSegmentor):
         )
         if train_cfg is not None:
             self.unsup_weight = self.train_cfg.unsup_weight
+            
         assert self.branch1.decode_head.ignore_index == self.branch2.decode_head.ignore_index, "'ignore_index' of two branches must be the same."
         self.ignore_index = self.branch1.decode_head.ignore_index
         # Register a new loss module for culculating CPS loss
@@ -50,14 +51,19 @@ class DML(MultiStreamSegmentor):
         # 1. calculate CPS loss for all data
         log_vars_cps = self._forward_DML_train(pred_1, pred_2)
         log_vars.update(log_vars_cps)
-        print(log_vars)
 
         # 2. calculate supervised loss (cross-entropy) for labeled data
         log_vars_sup = dict()
         log_vars_sup['sup_loss1'] = self._loss(self.branch1, pred_1, gt_semantic_seg.squeeze(1))#gt_seg.squeeze(1)
         log_vars_sup['sup_loss2'] = self._loss(self.branch2, pred_2, gt_semantic_seg.squeeze(1))
         log_vars.update(log_vars_sup)
-        print(log_vars)
+        log_vars['unsup_weight'] =self.unsup_weight
+        '''
+        if log_vars_sup['sup_loss1']-log_vars_sup['sup_loss2']>0:
+            log_vars['unsup_loss2'] = log_vars['unsup_loss2']*0
+        else:
+            log_vars['unsup_loss1'] = log_vars['unsup_loss1']*0
+        '''
         return log_vars
 
     def _forward_DML_train(self, pred_1, pred_2):
@@ -66,7 +72,6 @@ class DML(MultiStreamSegmentor):
         pred_2=F.log_softmax(pred_2, dim=1)
         label1 = pred_1.detach()
         label2 = pred_2.detach()
-        temp=pred_1.log()
         loss['unsup_loss1'] = weighted_loss(self._loss(self.branch1, pred_1, label2, True), self.unsup_weight)
         loss['unsup_loss2'] = weighted_loss(self._loss(self.branch2, pred_2, label1, True), self.unsup_weight)
         return loss

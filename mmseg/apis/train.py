@@ -92,7 +92,8 @@ def train_segmentor(model,
     # register hooks
     runner.register_training_hooks(cfg.lr_config, cfg.optimizer_config,
                                    cfg.checkpoint_config, cfg.log_config,
-                                   cfg.get('momentum_config', None))
+                                   cfg.get('momentum_config', None),
+                                   custom_hooks_config=cfg.get('custom_hooks', None))
 
     # an ugly walkaround to make the .log and .log.json filenames the same
     runner.timestamp = timestamp

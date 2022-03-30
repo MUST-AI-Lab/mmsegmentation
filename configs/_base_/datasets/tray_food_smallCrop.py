@@ -1,10 +1,10 @@
 # dataset settings
-dataset_type = 'CamVidVideoDataset'
-data_root = 'data/camvid/'
+dataset_type = 'TrayFoodDataset'
+data_root = 'data/tray_food/TrayDataset/TrayDataset'
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
-img_scale = (960, 720)
-crop_size = (512, 512)
+img_scale = (416, 256)
+crop_size = (128, 128)
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations'),
@@ -33,31 +33,32 @@ test_pipeline = [
         ])
 ]
 data = dict(
-    samples_per_gpu=2,
-    workers_per_gpu=1,
+    samples_per_gpu=14,
+    workers_per_gpu=2,
     train=dict(
         type=dataset_type,
         data_root=data_root,
-        img_dir='images',
-        ann_dir='labels',
-        split='annotations/train.txt',
+        img_dir='XTrain',
+        ann_dir='yTrain',
+        split='train.txt',
 
         pipeline=train_pipeline),
     val=dict(
         type=dataset_type,
         data_root=data_root,
-        img_dir='images',
-        ann_dir='labels',
-        split='annotations/val.txt',
+        img_dir='XTrain',
+        ann_dir='yTrain',
+        split='val.txt',
         
       
         pipeline=test_pipeline),
     test=dict(
         type=dataset_type,
         data_root=data_root,
-        img_dir='images',
-        ann_dir='labels',
-        split='annotations/val.txt',
+        img_dir='XTrain',
+        ann_dir='yTrain',
+        split='val.txt',
         pipeline=test_pipeline))
 
         #split='annotations/test.txt',
+    #14
