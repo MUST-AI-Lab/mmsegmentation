@@ -155,3 +155,133 @@ class LoadAnnotations(object):
         repr_str += f'(reduce_zero_label={self.reduce_zero_label},'
         repr_str += f"imdecode_backend='{self.imdecode_backend}')"
         return repr_str
+
+@PIPELINES.register_module()
+class LoadAnnotations_m2(object):
+    """Load annotations for semantic segmentation.
+
+    Args:
+        reduce_zero_label (bool): Whether reduce all label value by 1.
+            Usually used for datasets where 0 is background label.
+            Default: False.
+        file_client_args (dict): Arguments to instantiate a FileClient.
+            See :class:`mmcv.fileio.FileClient` for details.
+            Defaults to ``dict(backend='disk')``.
+        imdecode_backend (str): Backend for :func:`mmcv.imdecode`. Default:
+            'pillow'
+    """
+
+    def __init__(self,
+                 reduce_zero_label=False,
+                 file_client_args=dict(backend='disk'),
+                 imdecode_backend='pillow'):
+        self.reduce_zero_label = reduce_zero_label
+        self.file_client_args = file_client_args.copy()
+        self.file_client = None
+        self.imdecode_backend = imdecode_backend
+        self.M2_INFO = [
+            {
+              "id": 0,
+              "name": "unknown",
+              "color": [170,0,85],
+              "super-category": "misc"
+            },
+            {
+              "id": 1,
+              "name": "instruments",
+              "color": [0,85,170],
+              "super-category": "instrument"
+            },
+            {
+              "id": 2,
+              "name": "liver",
+              "color": [85,170,0],
+              "super-category": "organ"
+            },
+            {
+              "id": 3,
+              "name": "gall-bladder",
+              "color": [85,170,255],
+              "super-category": "organ"
+            },
+            {
+              "id": 4,
+              "name": "fat",
+              "color": [85,255,0],
+              "super-category": "organ"
+            },
+            {
+              "id": 5,
+              "name": "upperwall",
+              "color": [85,255,170],
+              "super-category": "organ"
+            },
+            {
+              "id": 6,
+              "name": "intestine",
+              "color": [255,0,255],
+              "super-category": "organ"
+            },
+            {
+              "id": 7,
+              "name": "artery",
+              "color": [170,0,255],
+              "super-category": "artery"
+            },
+            {
+              "id": 8,
+              "name": "black",
+              "color": [0,0,0],
+              "super-category": "misc"
+            }
+        ]
+
+    def __call__(self, results):
+        """Call function to load multiple types annotations.
+
+        Args:
+            results (dict): Result dict from :obj:`mmseg.CustomDataset`.
+
+        Returns:
+            dict: The dict contains loaded semantic segmentation annotations.
+        """
+
+        if self.file_client is None:
+            self.file_client = mmcv.FileClient(**self.file_client_args)
+
+        if results.get('seg_prefix', None) is not None:
+            filename = osp.join(results['seg_prefix'],
+                                results['ann_info']['seg_map'])
+        else:
+            filename = results['ann_info']['seg_map']
+        img_bytes = self.file_client.get(filename)
+        gt_semantic_seg = mmcv.imfrombytes(
+            img_bytes, flag='unchanged',
+            backend=self.imdecode_backend).squeeze().astype(np.uint8)
+        new_mask = np.zeros((gt_semantic_seg.shape[0], gt_semantic_seg.shape[1]))
+        for i in range(len(self.M2_INFO)):
+            rgb = np.asarray(self.M2_INFO[i]["color"])
+            mask = np.where(np.all(gt_semantic_seg == rgb, axis=2))
+            new_mask[mask] = i
+
+        # modify if custom classes
+        if results.get('label_map', None) is not None:
+            raise NotImplementedError()
+            '''for old_id, new_id in results['label_map'].items():
+                gt_semantic_seg[gt_semantic_seg == old_id] = new_id'''
+        # reduce zero_label
+        if self.reduce_zero_label:
+            # avoid using underflow conversion
+            raise NotImplementedError()
+            '''gt_semantic_seg[gt_semantic_seg == 0] = 255
+            gt_semantic_seg = gt_semantic_seg - 1
+            gt_semantic_seg[gt_semantic_seg == 254] = 255'''
+        results['gt_semantic_seg'] = new_mask
+        results['seg_fields'].append('gt_semantic_seg')
+        return results
+
+    def __repr__(self):
+        repr_str = self.__class__.__name__
+        repr_str += f'(reduce_zero_label={self.reduce_zero_label},'
+        repr_str += f"imdecode_backend='{self.imdecode_backend}')"
+        return repr_str

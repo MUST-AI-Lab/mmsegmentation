@@ -13,7 +13,7 @@ evaluation = dict(metric=['mDice','mIoU', 'mFscore'])
 semi_wrapper = dict(
     type="DML",
     train_cfg=dict(unsup_weight=0),
-    test_cfg=dict(inference_on='branch1'),
+    test_cfg=dict(inference_on='branch2'),
 )
 
 custom_hooks = [

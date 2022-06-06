@@ -62,6 +62,10 @@ def parse_args():
     parser.add_argument(
         '--options', nargs='+', action=DictAction, help='custom options')
     parser.add_argument(
+        '--branch', type=str,
+        default='None',
+        help='which branch to test')
+    parser.add_argument(
         '--eval-options',
         nargs='+',
         action=DictAction,
@@ -139,6 +143,9 @@ def main():
 
     # build the model and load checkpoint
     cfg.model.train_cfg = None
+    if args.branch != 'None':
+        cfg.semi_wrapper.test_cfg.inference_on = args.branch
+        print("--> Overloading \"inference_on\" to ", args.branch)
     cfg = patch_config_semi(cfg)
     model = build_segmentor(cfg.model, test_cfg=cfg.get('test_cfg'))
     fp16_cfg = cfg.get('fp16', None)

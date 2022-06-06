@@ -21,17 +21,21 @@ class StepLossWeightUpdateHook(LossWeightUpdateHook):
                  step,
                  gamma,
                  by_epoch=False,
+                 reduce=False,
                  max_weight=40):
         '''
         'gamma': update scale
         '''
-        super(StepLossWeightUpdateHook, self).__init__(max_weight, by_epoch)
+        super(StepLossWeightUpdateHook, self).__init__(by_epoch=by_epoch,max_weight=max_weight)
         self.step = step
         self.gamma = gamma
+        self.reduce=reduce
         
     def get_weight(self,runner,max_weight):
         cur_iter = runner.iter
         new_weight=self.gamma*(cur_iter//self.step)
+        if self.reduce==True and new_weight>=max_weight:
+            return 0
         return min(new_weight, max_weight)
     
                  
